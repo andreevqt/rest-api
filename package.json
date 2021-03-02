@@ -1,0 +1,21 @@
+{
+  "name": "rest-api",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "dependencies": {
+    "bookshelf": "1.2.0",
+    "dotenv": "^8.2.0",
+    "knex": "0.21.18",
+    "lodash": "4.17.21",
+    "mysql": "2.18.1"
+  },
+  "devDependencies": {},
+  "scripts": {
+    "start": "node ./src/index.js",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC"
+}
