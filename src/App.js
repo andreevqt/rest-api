@@ -2,21 +2,37 @@ const fs = require(`fs`).promises;
 const _ = require(`lodash`);
 const path = require(`path`);
 const config = require(`./config`);
-const bookshelf = require(`./bookshelf`);
+const bookshelf = require(`./connectors/bookshelf`);
 
 class App {
+
+  /**
+   * Initialize the application
+   * 
+   * @return {undefined}
+   */
   async load() {
     this.dir = process.cwd();
-    this.mapper = await this.initMapper(config.db.client);
+    this.connector = await this.createConnector(config.db.client);
 
     await this.loadModels();
   }
 
+  /**
+   * Close database connection
+   * 
+   * @returns {undefined}
+   */
   async destroy() {
-    return this.mapper.close();
+    return this.connector.close();
   }
 
-  async initMapper(client) {
+  /**
+   * 
+   * @param {*} client 
+   * @returns 
+   */
+  async createConnector(client) {
     if ([`pg`, `mysql`, `sqlite`].includes(client)) {
       await bookshelf.connect();
       return bookshelf;
@@ -33,8 +49,8 @@ class App {
       const name = path.parse(file).name;
       model.name = name;
       model.path = `${modelsPath}/${file}`;
-      model.entity = require(model.path);
-      model.internal = await this.mapper.create(model);
+      model.definition = require(model.path);
+      model.internal = await this.connector.createOrUpdateTable(model);
 
       return Promise.resolve({...res, [name]: model});
     }, Promise.resolve({}));
