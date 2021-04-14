@@ -1,8 +1,13 @@
 const init = require(`./App`);
 
 (async () => {
-  await init();
-  await app.destroy();
+  try {
+    await init();
+  } catch (err) {
+    console.log(err);
+  } finally {
+    await app.destroy();
+  }
 })();
 
 

@@ -2,19 +2,18 @@ const fs = require(`fs`).promises;
 const _ = require(`lodash`);
 const path = require(`path`);
 const config = require(`./config`);
-const bookshelf = require(`./connectors/bookshelf`);
+const bookshelf = require(`./orm/bookshelf`);
 
 class App {
 
   /**
+   * 
    * Initialize the application
    * 
-   * @return {undefined}
    */
   async load() {
     this.dir = process.cwd();
-    this.connector = await this.createConnector(config.db.client);
-
+    this.orm = await this.createOrm(config.db.client);
     await this.loadModels();
   }
 
@@ -24,18 +23,17 @@ class App {
    * @returns {undefined}
    */
   async destroy() {
-    return this.connector.close();
+    return this.orm.close();
   }
 
   /**
    * 
    * @param {*} client 
-   * @returns 
+   * 
    */
-  async createConnector(client) {
+  async createOrm(client) {
     if ([`pg`, `mysql`, `sqlite`].includes(client)) {
-      await bookshelf.connect();
-      return bookshelf;
+      return bookshelf.connect();
     }
   }
 
@@ -44,15 +42,16 @@ class App {
 
     const files = await fs.readdir(modelsPath);
     this.models = await files.reduce(async (res, file) => {
-      let model = {};
+      let properties = {};
 
       const name = path.parse(file).name;
-      model.name = name;
-      model.path = `${modelsPath}/${file}`;
-      model.definition = require(model.path);
-      model.internal = await this.connector.createOrUpdateTable(model);
+      properties.name = name;
+      properties.path = `${modelsPath}/${file}`;
+      properties.definition = require(properties.path);
+      properties.orm = this.orm;
+      properties.internal = await this.orm.createOrUpdateTable(properties);
 
-      return Promise.resolve({...res, [name]: model});
+      return Promise.resolve({...res, [name]: properties});
     }, Promise.resolve({}));
   }
 }
