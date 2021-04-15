@@ -1,6 +1,5 @@
 module.exports = {
   settings: {
-    tableName: `posts`,
     id: true
   },
   attributes: {

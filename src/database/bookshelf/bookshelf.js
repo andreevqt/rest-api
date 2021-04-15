@@ -1,7 +1,9 @@
 'use strict';
 
-const config = require(`../config`);
+const config = require(`../../config`);
+const pluralize = require(`pluralize`);
 const bookshelf = require(`bookshelf`);
+const _ = require(`lodash`);
 
 let knex;
 
@@ -9,10 +11,10 @@ const close = async () => {
   return knex.destroy();
 };
 
-const createOrUpdateTable = async ({name, definition, orm}) => {
-  const {settings: {tableName, id}, attributes} = definition;
+const createOrUpdateTable = async ({name, definition}) => {
+  const {settings: {tableName = pluralize(name), id}, attributes} = definition;
 
-  const hasTable = await orm.knex.schema.hasTable(tableName);
+  const hasTable = await knex.schema.hasTable(tableName);
 
   const createId = (table) => {
     if (id) {
@@ -21,7 +23,7 @@ const createOrUpdateTable = async ({name, definition, orm}) => {
   };
 
   const createTable = async (table) => {
-    await orm.knex.schema.createTable(table, (tbl) => {
+    await knex.schema.createTable(table, (tbl) => {
       createId(tbl);
       createColumns(tbl, attributes);
     });
@@ -68,6 +70,15 @@ const createOrUpdateTable = async ({name, definition, orm}) => {
   }
 };
 
+const internal = ({orm, tableName, name}) => {
+  
+  return bookshelf(orm.knex).model(
+    _.capitalize(name), {
+      tableName
+    }
+  );
+};
+
 module.exports.connect = async () => {
   knex = require('knex')({
     debug: config.debug,
@@ -78,6 +89,7 @@ module.exports.connect = async () => {
   return {
     knex,
     createOrUpdateTable,
+    internal,
     close
   };
 };

@@ -1,8 +1,8 @@
-const init = require(`./App`);
+const app = require(`./App`)();
 
 (async () => {
   try {
-    await init();
+    await app.load();
   } catch (err) {
     console.log(err);
   } finally {
