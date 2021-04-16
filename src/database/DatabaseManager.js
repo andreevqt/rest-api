@@ -21,7 +21,7 @@ class DatabaseManager {
     if ([`pg`, `mysql`, `sqlite`].includes(client)) {
       this.orm = await bookshelf.connect();
       this.models = await mountModels(this.app.modelsPath, this.orm);
-      console.log(this.models);
+      // console.log(this.models);
       this.initialized = true;
     }
 

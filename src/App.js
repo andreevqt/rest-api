@@ -21,6 +21,10 @@ class App {
     await this.db.connect();
   }
 
+  /**
+   * Build query
+   * 
+   */
   query(entity) {
     return this.db.query(entity);
   }
@@ -37,7 +41,6 @@ class App {
 
 module.exports = () => {
   const app = new App();
-  // await app.load();
 
   global.app = app;
 
