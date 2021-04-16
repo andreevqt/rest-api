@@ -27,7 +27,7 @@ const convertFilters = (filters) => {
   });
 
   return result;
-}
+};
 
 module.exports = {
   convertFilters,
