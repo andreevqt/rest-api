@@ -10,6 +10,8 @@
     "knex": "0.21.18",
     "lodash": "4.17.21",
     "mysql": "2.18.1",
+    "pino": "6.11.3",
+    "pino-pretty": "4.7.1",
     "pluralize": "8.0.0"
   },
   "devDependencies": {

@@ -61,6 +61,11 @@ module.exports = ({model, app}) => {
       .then((models) => models.toJSON());
   };
 
+  const findOne = async (params, populate, {transacting} = {}) => {
+    const results = await find(params, populate, transacting);
+    return results[0] || null;
+  };
+
   const create = async (attributes, {transacting} = {}) => {
     const data = {...selectAttributes(attributes)};
     return (await model.forge(data).save(null, {transacting})).toJSON();
@@ -68,6 +73,7 @@ module.exports = ({model, app}) => {
 
   return {
     find,
+    findOne,
     create
   };
 }

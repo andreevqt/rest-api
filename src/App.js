@@ -6,11 +6,13 @@ const path = require(`path`);
 const config = require(`./config`);
 const bookshelf = require(`./database/bookshelf`);
 const {createDatabaseManager} = require(`./database/DatabaseManager`);
+const {logger} = require(`./utils`);
 
 class App {
 
   constructor() {
     this.modelsPath = `${process.cwd()}/src/models`;
+    this.logger = logger;
   }
 
   /**
@@ -20,8 +22,8 @@ class App {
   async load() {
     this.db = createDatabaseManager(this);
     this.config = config;
-
     await this.db.connect();
+    this.logger.info(`App has been loaded`);
   }
 
   /**
@@ -46,7 +48,10 @@ class App {
    * @returns {undefined}
    */
   async destroy() {
-    return this.db.close();
+    const result = await this.db.close();
+
+    this.logger.info(`App has been destroyed`);
+    return result;
   }
 }
 

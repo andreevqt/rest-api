@@ -91,12 +91,12 @@ module.exports.connect = async () => {
       connection: {
         filename: `:memory:`
       },
-      debug: config.debug,
+      debug: config.debug === true,
       useNullAsDefault: true
     });
   } else {
     knex = require('knex')({
-      debug: config.debug,
+      debug: config.debug === true,
       client: config.db.client,
       connection: config.db
     });
