@@ -3,6 +3,7 @@
 const config = require(`../../config`);
 const pluralize = require(`pluralize`);
 const bookshelf = require(`bookshelf`);
+const queries = require(`./queries`);
 const _ = require(`lodash`);
 
 let knex;
@@ -31,19 +32,24 @@ const createOrUpdateTable = async ({name, definition}) => {
 
   const buildColumn = (table, name, type) => {
     switch (type) {
-      case 'string':
+      case `string`:
         return table.string(name);
-      case 'uuid':
+      case `text`:
+        return table.text(name, `longtext`);
+      case `uuid`:
         return table.uuid(name);
-      case 'uid':
+      case `uid`:
         table.unique(name);
         return table.string(name);
-      case 'integer':
+      case `integer`:
         return table.integer(name);
-      case 'boolean': 
+      case `boolean`:
         return table.boolean(name);
-      case 'decimal':
+      case `decimal`:
         return table.decimal(name);
+      case `test`:
+        return
+
       default:
         return null;
     }
@@ -71,25 +77,36 @@ const createOrUpdateTable = async ({name, definition}) => {
 };
 
 const internal = ({orm, tableName, name}) => {
-  
   return bookshelf(orm.knex).model(
     _.capitalize(name), {
-      tableName
-    }
+    tableName
+  }
   );
 };
 
 module.exports.connect = async () => {
-  knex = require('knex')({
-    debug: config.debug,
-    client: config.db.client,
-    connection: config.db
-  });
+  if (process.env.NODE_ENV === `test`) {
+    knex = require('knex')({
+      client: `sqlite3`,
+      connection: {
+        filename: `:memory:`
+      },
+      debug: config.debug,
+      useNullAsDefault: true
+    });
+  } else {
+    knex = require('knex')({
+      debug: config.debug,
+      client: config.db.client,
+      connection: config.db
+    });
+  }
 
   return {
     knex,
     createOrUpdateTable,
     internal,
+    queries,
     close
   };
 };

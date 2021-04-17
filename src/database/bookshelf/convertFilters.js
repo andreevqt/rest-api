@@ -18,11 +18,11 @@ const convertFilter = (key, value) => {
   };
 };
 
-const convertFilters = (filters) => {
+const convertFilters = (params) => {
   const result = {};
 
-  Object.keys(filters).forEach((key) => {
-    const value = filters[key];
+  Object.keys(params).forEach((key) => {
+    const value = params[key];
     result[key] = convertFilter(key, value);
   });
 

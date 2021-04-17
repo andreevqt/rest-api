@@ -4,19 +4,22 @@ const fs = require(`fs`).promises;
 const _ = require(`lodash`);
 const path = require(`path`);
 const config = require(`./config`);
-const bookshelf = require(`./database/bookshelf/bookshelf`);
+const bookshelf = require(`./database/bookshelf`);
 const {createDatabaseManager} = require(`./database/DatabaseManager`);
 
 class App {
+
+  constructor() {
+    this.modelsPath = `${process.cwd()}/src/models`;
+  }
 
   /**
    * Initialize the application
    * 
    */
   async load() {
-    this.dir = process.cwd();
-    this.modelsPath = `${this.dir}/src/models`;
     this.db = createDatabaseManager(this);
+    this.config = config;
 
     await this.db.connect();
   }
@@ -27,6 +30,14 @@ class App {
    */
   query(entity) {
     return this.db.query(entity);
+  }
+
+  /**
+   * Set models path
+   * @param {string} path - new path
+   */
+  setModelsPath(path) {
+    this.modelsPath = path;
   }
 
   /**

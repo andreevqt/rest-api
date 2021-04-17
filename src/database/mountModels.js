@@ -2,6 +2,7 @@
 
 const fs = require(`fs`).promises;
 const path = require(`path`);
+const pluralize = require(`pluralize`);
 
 const mountModels = async (modelsPath, orm) => {
   const files = await fs.readdir(modelsPath);
@@ -16,9 +17,12 @@ const mountModels = async (modelsPath, orm) => {
 
     await orm.createOrUpdateTable(properties);
 
+
+
     properties.internalModel = orm.internal({
       orm,
-      tableName: properties.definition.settings.tableName,
+      tableName: properties.definition.settings.tableName
+        || pluralize(name),
       name
     });
 

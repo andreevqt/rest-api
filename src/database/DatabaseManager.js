@@ -1,8 +1,9 @@
 'use strict';
 
 const config = require(`../config`);
-const bookshelf = require(`./bookshelf/bookshelf`);
+const bookshelf = require(`./bookshelf`);
 const {mountModels} = require(`./mountModels`);
+const _ = require(`lodash`);
 
 class DatabaseManager {
   constructor(app) {
@@ -16,12 +17,11 @@ class DatabaseManager {
       return;
     }
 
-    const {client} = config.db;
+    const {config: {db: client}, modelsPath} = this.app;
 
-    if ([`pg`, `mysql`, `sqlite`].includes(client)) {
+    if ([`pg`, `mysql`, `sqlite`].includes(client.client)) {
       this.orm = await bookshelf.connect();
-      this.models = await mountModels(this.app.modelsPath, this.orm);
-      // console.log(this.models);
+      this.models = await mountModels(modelsPath, this.orm);
       this.initialized = true;
     }
 
@@ -32,8 +32,16 @@ class DatabaseManager {
     this.orm.close();
   }
 
-  query(enitity) {
-    return this.orm.query(enitity)
+  findEntity(entity) {
+    return _.find(
+      this.models,
+      (_o, key) => key === entity
+    );
+  }
+
+  query(entity) {
+    const {internalModel: model} = this.findEntity(entity);
+    return this.orm.queries({model, app: this.app});
   }
 }
 
