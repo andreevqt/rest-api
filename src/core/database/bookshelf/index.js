@@ -1,6 +1,6 @@
 'use strict';
 
-const config = require(`../../config`);
+const config = require(`../../../../config`);
 const pluralize = require(`pluralize`);
 const bookshelf = require(`bookshelf`);
 const queries = require(`./queries`);

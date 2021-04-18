@@ -4,7 +4,7 @@ const app = require(`../../App`)();
 const postsData = require(`../../tests/fixtures/data/posts`);
 
 beforeAll(async () => {
-  app.setModelsPath(`${process.cwd()}/src/tests/fixtures/models`);
+  app.setModelsPath(`${process.cwd()}/src/core/tests/fixtures/models`);
   await app.load();
 
   postsData.forEach(async (data) => {

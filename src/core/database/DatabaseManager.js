@@ -1,6 +1,6 @@
 'use strict';
 
-const config = require(`../config`);
+// const config = require(`../../../config`);
 const bookshelf = require(`./bookshelf`);
 const {mountModels} = require(`./mountModels`);
 const _ = require(`lodash`);

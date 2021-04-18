@@ -1,12 +1,8 @@
 'use strict';
 
-const fs = require(`fs`).promises;
-const _ = require(`lodash`);
-const path = require(`path`);
-const config = require(`./config`);
-const bookshelf = require(`./database/bookshelf`);
+const config = require(`../../config`);
 const {createDatabaseManager} = require(`./database/DatabaseManager`);
-const {logger} = require(`./utils`);
+const logger = require(`./utils/logger`);
 
 class App {
 
@@ -20,15 +16,17 @@ class App {
    * 
    */
   async load() {
-    this.db = createDatabaseManager(this);
     this.config = config;
+    this.db = createDatabaseManager(this);
+
     await this.db.connect();
+    
     this.logger.info(`App has been loaded`);
   }
 
   /**
    * Build query
-   * 
+   * @param {string} entity
    */
   query(entity) {
     return this.db.query(entity);
