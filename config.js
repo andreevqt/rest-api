@@ -1,7 +1,9 @@
 require('dotenv').config();
 
+const {getBool} = require(`./src/core/utils/configHelpers`);
+
 module.exports = {
-  debug: process.env.debug || false,
+  debug: getBool(process.env.debug, false),
   db: {
     client: `mysql`,
     host: process.env.DB_HOST || `localhost`,

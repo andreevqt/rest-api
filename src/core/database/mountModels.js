@@ -5,8 +5,21 @@ const path = require(`path`);
 const pluralize = require(`pluralize`);
 const {coreStoreModel}  = require(`../utils/coreStore`);
 
+/**
+ * 
+ * @param {String} modelsPath 
+ * @param {Object} orm 
+ * 
+ * @returns {Object}
+ */
 const mountModels = async (modelsPath, orm) => {
-
+  
+  /**
+   * 
+   * @param {String} file 
+   * 
+   * @returns {Object}
+   */
   const mountModel = async (file) => {
     let properties = {};
 
@@ -24,9 +37,11 @@ const mountModels = async (modelsPath, orm) => {
         || pluralize(name),
       name
     });
+
+    return properties;
   };
 
-  const mountCoreStore = () => {
+  const mountCoreStore = async () => {
     let properties = {}
     properties.name = `core-store`;
     properties.definition = coreStoreModel;
@@ -34,6 +49,12 @@ const mountModels = async (modelsPath, orm) => {
     properties.orm = orm;
 
     await orm.createOrUpdateTable(properties);
+
+    properties.internalModel = orm.internal({
+      orm,
+      tableName: `core-store`,
+      name: `core-store`
+    });
   };
 
   const files = await fs.readdir(modelsPath);

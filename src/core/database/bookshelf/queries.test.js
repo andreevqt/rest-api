@@ -31,6 +31,40 @@ describe(`create`, () => {
   });
 });
 
+describe(`update`, () => {
+  test(`Should update a model`, async () => {
+    const created = await app.query(`post`)
+      .create({title: `test`});
+    const updated = await app.query(`post`)
+      .update({id: created.id}, {title: `hello`});
+
+    expect(updated.title).toBe(`hello`);
+
+  });
+});
+
+describe(`delete`, () => {
+  test(`Should delete a model`, async () => {
+    const created = await app.query(`post`)
+      .create({title: `test`});
+
+    const deleted = await app.query(`post`)
+      .delete(created.id);
+    expect(deleted.id).toBe(created.id);
+
+    const post = await app.query(`post`).findOne({id: created.id});
+    expect(post).toBe(null);
+  });
+
+  test(`Should throw if wrong id`, async () => {
+    try {
+      await app.query(`post`).delete(123456);
+    } catch (e) {
+      expect(e.message).toBe(`entry.notFound`);
+    }
+  });
+});
+
 describe(`find`, () => {
   test(`Contains operator`, async () => {
     const posts = await app.query(`post`)

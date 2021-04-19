@@ -71,9 +71,40 @@ module.exports = ({model, app}) => {
     return (await model.forge(data).save(null, {transacting})).toJSON();
   };
 
+  const update = async (params, attributes, {transacting} = {}) => {
+    const entry = await model.where(params).fetch({transacting});
+    if (!entry) {
+      const err = new Error(`entry.notFound`);
+      err.status = 404;
+      throw err;
+    }
+
+    const data = selectAttributes(attributes);
+    const updated = Object.keys(data).length > 0 ? await entry.save(data, {
+      transacting
+    }) : entry; 
+
+    return findOne(params, null, {transacting});
+  };
+
+  const deleteFn = async (id, {transacting} = {}) => {
+    const entry = await model.where({id}).fetch({transacting});
+    console.log(`${id} - ${entry.id}`);
+    if (!entry) {
+      const err = new Error('entry.notFound');
+      err.status = 404;
+      throw err;
+    }
+
+    await model.where({id: entry.id}).destroy({transacting, require: false});
+    return entry.toJSON();
+  };
+
   return {
     find,
     findOne,
-    create
+    update,
+    create,
+    delete: deleteFn
   };
 }

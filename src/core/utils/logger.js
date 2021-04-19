@@ -1,15 +1,16 @@
 const pino = require('pino');
 const _ = require('lodash');
+const {getBool} = require(`../utils/configHelpers`);
 
 const logLevels = Object.keys(pino.levels.values);
 
 function getLogLevel() {
-  if (!_.isString(process.env.STRAPI_LOG_LEVEL)) {
+  if (!_.isString(process.env.APP_LOG_LEVEL)) {
     // Default value.
     return 'debug';
   }
 
-  const logLevel = process.env.STRAPI_LOG_LEVEL.toLowerCase();
+  const logLevel = process.env.APP_LOG_LEVEL.toLowerCase();
 
   if (!_.includes(logLevels, logLevel)) {
     throw new Error(
@@ -22,19 +23,9 @@ function getLogLevel() {
   return logLevel;
 }
 
-function getBool(envVar, defaultValue) {
-  if (_.isBoolean(envVar)) return envVar;
-  if (_.isString(envVar)) {
-    if (envVar === 'true') return true;
-    if (envVar === 'false') return false;
-  }
-  return defaultValue;
-}
-
 const loggerConfig = {
   level: getLogLevel(),
   timestamp: getBool(process.env.APP_LOG_TIMESTAMP, true),
-  // prettyPrint: getBool(process.env.STRAPI_LOG_PRETTY_PRINT, true),
   forceColor: getBool(process.env.APP_LOG_FORCE_COLOR, true),
   prettyPrint: getBool(process.env.APP_LOG_PRETTY_PRINT, true)
 };
