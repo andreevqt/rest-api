@@ -48,6 +48,7 @@ describe(`delete`, () => {
     const created = await app.query(`post`)
       .create({title: `test`});
 
+    console.log(`here ${created.id}`);
     const deleted = await app.query(`post`)
       .delete(created.id);
     expect(deleted.id).toBe(created.id);
@@ -58,7 +59,7 @@ describe(`delete`, () => {
 
   test(`Should throw if wrong id`, async () => {
     try {
-      await app.query(`post`).delete(123456);
+      await app.query(`post`).delete(666);
     } catch (e) {
       expect(e.message).toBe(`entry.notFound`);
     }

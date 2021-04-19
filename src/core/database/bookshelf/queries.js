@@ -88,8 +88,7 @@ module.exports = ({model, app}) => {
   };
 
   const deleteFn = async (id, {transacting} = {}) => {
-    const entry = await model.where({id}).fetch({transacting});
-    console.log(`${id} - ${entry.id}`);
+    const entry = await model.where({id}).fetch({transacting, require: false});
     if (!entry) {
       const err = new Error('entry.notFound');
       err.status = 404;
