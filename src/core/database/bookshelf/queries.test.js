@@ -48,7 +48,6 @@ describe(`delete`, () => {
     const created = await app.query(`post`)
       .create({title: `test`});
 
-    console.log(`here ${created.id}`);
     const deleted = await app.query(`post`)
       .delete(created.id);
     expect(deleted.id).toBe(created.id);

@@ -3,7 +3,7 @@
 const coreStoreModel = {
   settings: {
     id: true,
-    tableName: `core-store`
+    tableName: `core_store`
   },
   attributes: {
     key: {
@@ -22,10 +22,8 @@ const createCoreStore = ({db}) => {
   const get = async (params = {}) => {
     const {type, key, name} = params;
 
-    const prefix = `${type}${name ? `_${name}` : ``}`;
-
     const where = {
-      key: `${prefix}_${key}`
+      key
     };
 
     const data = await db.query(`core-store`).findOne(where);
@@ -55,7 +53,7 @@ const createCoreStore = ({db}) => {
   const set = async (params = {}) => {
     const {type, key, value, name} = params;
 
-    const prefix = `${type}${name ? `_${name}` : ``}`;
+    const prefix = `${type ? type : ''}${name ? `_${name}` : ``}`;
 
     const where = {
       key: `${prefix}_${key}`
@@ -72,7 +70,7 @@ const createCoreStore = ({db}) => {
       await db.query(`core-store`).update({id: newData.id}, newData);
     } else {
       const newData = {
-        ...data,
+        ...where,
         value: JSON.stringify(value) || value.toString(),
         type: (typeof value).toString()
       };

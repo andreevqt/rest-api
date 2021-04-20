@@ -2,7 +2,7 @@
 
 // const config = require(`../../../config`);
 const bookshelf = require(`./bookshelf`);
-const {mountModels} = require(`./mountModels`);
+const {mountModels} = require(`./bookshelf/mountModels`);
 const _ = require(`lodash`);
 
 class DatabaseManager {
@@ -20,8 +20,12 @@ class DatabaseManager {
     const {config: {db: client}, modelsPath} = this.app;
 
     if ([`pg`, `mysql`, `sqlite`].includes(client.client)) {
-      this.orm = await bookshelf.connect();
-      this.models = await mountModels(modelsPath, this.orm);
+      this.connector = bookshelf;
+
+      const knex = await this.connector.connection.connect();
+      this.orm = bookshelf.orm(knex);
+
+      this.models = await mountModels(modelsPath, this.connector, this.orm);
       this.initialized = true;
     }
 
@@ -29,7 +33,7 @@ class DatabaseManager {
   }
 
   close() {
-    this.orm.close();
+    this.connector.connection.close();
   }
 
   findEntity(entity) {
@@ -40,8 +44,8 @@ class DatabaseManager {
   }
 
   query(entity) {
-    const {internalModel: model} = this.findEntity(entity);
-    return this.orm.queries({model, app: this.app});
+    const model = this.findEntity(entity);
+    return this.connector.queries({model, app: this.app});
   }
 }
 
