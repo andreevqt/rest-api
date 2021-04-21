@@ -79,8 +79,16 @@ const createCoreStore = ({db}) => {
     }
   };
 
-  const deleteFn = (params = {}) => {
+  const deleteFn = async (params = {}) => {
+    const {type, key, name} = params;
 
+    const prefix = `${type ? type : ''}${name ? `_${name}` : ``}`;
+
+    const where = {
+      key: `${prefix}_${key}`
+    };
+
+    await db.query('core_store').delete(where);
   };
 
   return {
