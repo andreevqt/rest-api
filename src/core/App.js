@@ -2,13 +2,14 @@
 
 const config = require(`../../config`);
 const {createDatabaseManager} = require(`./database/DatabaseManager`);
+const {createCoreStore} = require(`./utils/coreStore`)
 const logger = require(`./utils/logger`);
 
 class App {
 
   constructor() {
     this.modelsPath = `${process.cwd()}/src/models`;
-    this.logger = logger;
+    this.log = logger;
   }
 
   /**
@@ -18,10 +19,10 @@ class App {
   async load() {
     this.config = config;
     this.db = createDatabaseManager(this);
-
     await this.db.connect();
-    
-    this.logger.info(`App has been loaded`);
+
+    this.store = createCoreStore({db: this.db});
+    this.log.info(`App has been loaded`);
   }
 
   /**
@@ -48,7 +49,7 @@ class App {
   async destroy() {
     const result = await this.db.close();
 
-    this.logger.info(`App has been destroyed`);
+    this.log.info(`App has been destroyed`);
     return result;
   }
 }

@@ -3,15 +3,8 @@ module.exports = {
     id: true
   },
   attributes: {
-    title: {
-      type: `string`,
-      required: true,
-    },
-    content: {
-      type: `text`
-    }, 
     author: {
-      type: `hasOne`
+      model: `user`
     }
   }
 };

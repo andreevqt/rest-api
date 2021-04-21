@@ -3,6 +3,7 @@
 // const config = require(`../../../config`);
 const bookshelf = require(`./bookshelf`);
 const {mountModels} = require(`./bookshelf/mountModels`);
+const {coreStoreModel} = require(`../utils/coreStore`);
 const _ = require(`lodash`);
 
 class DatabaseManager {
@@ -17,15 +18,18 @@ class DatabaseManager {
       return;
     }
 
-    const {config: {db: client}, modelsPath} = this.app;
+    const {config: {db: {client}}} = this.app;
+    
 
-    if ([`pg`, `mysql`, `sqlite`].includes(client.client)) {
+    if ([`pg`, `mysql`, `sqlite`].includes(client)) {
       this.connector = bookshelf;
 
-      const knex = await this.connector.connection.connect();
+      const knex = await bookshelf.connection.connect();
       this.orm = bookshelf.orm(knex);
 
-      this.models = await mountModels(modelsPath, this.connector, this.orm);
+      this.models = {};
+      await mountModels();
+
       this.initialized = true;
     }
 

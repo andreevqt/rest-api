@@ -1,6 +1,9 @@
 'use strict';
 
+const _ = require(`lodash`);
+
 const coreStoreModel = {
+  uid: `app:core_store`,
   settings: {
     id: true,
     tableName: `core_store`
@@ -15,18 +18,21 @@ const coreStoreModel = {
     type: {
       type: `string`
     }
-  }
+  },
+  associations: [
+  ]
 };
+
 
 const createCoreStore = ({db}) => {
   const get = async (params = {}) => {
-    const {type, key, name} = params;
+    const {key} = params;
 
     const where = {
       key
     };
 
-    const data = await db.query(`core-store`).findOne(where);
+    const data = await db.query(`core_store`).findOne(where);
 
     if (!data) {
       return null;
@@ -59,7 +65,7 @@ const createCoreStore = ({db}) => {
       key: `${prefix}_${key}`
     };
 
-    const data = await db.query(`core-store`).findOne(where);
+    const data = await db.query(`core_store`).findOne(where);
     if (data) {
       const newData = {
         ...data,
@@ -67,7 +73,7 @@ const createCoreStore = ({db}) => {
         type: (typeof value).toString()
       };
 
-      await db.query(`core-store`).update({id: newData.id}, newData);
+      await db.query(`core_store`).update({id: newData.id}, newData);
     } else {
       const newData = {
         ...where,
@@ -75,7 +81,7 @@ const createCoreStore = ({db}) => {
         type: (typeof value).toString()
       };
 
-      await db.query(`core-store`).create(newData);
+      await db.query(`core_store`).create(newData);
     }
   };
 
