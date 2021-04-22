@@ -37,6 +37,29 @@ const mountModels = async ({models, target}, {orm}) => {
     target[model] = _.assign(ormModel, target[model]);
     target[model]._attributes = definition.attributes;
 
+    // relations
+    Object.keys(definition.attributes).forEach((name) => {
+      const details = definition.attributes[name];
+      if (details.type !== undefined) {
+        return;
+      }
+
+      const {nature, verbose} = modelsUtils.getNature({
+        attribute: details,
+        attributeName,
+        modelName: model.toLowerCase()
+      });
+
+      modelsUtils.defineAssociations(model.toLowerCase(), definition, details, name);
+
+      switch (verbose) {
+        case `hasOne`:
+          
+        default:
+          break;
+      }
+    });
+
     await runMigrations({definition, orm})
     await storeDefinition(definition, orm);
   };
