@@ -21,9 +21,9 @@ class DatabaseManager {
       return;
     }
 
-    const {config: {db: {client}}} = this.app;
-
     this.initializeModelsMap();
+    
+    const client = this.app.config.get(`db.client`);
 
     if ([`pg`, `mysql`, `sqlite`].includes(client)) {
       this.connector = bookshelf(app);

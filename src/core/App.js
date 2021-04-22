@@ -13,7 +13,8 @@ class App {
     this.dir = opts.dir || `${process.cwd()}/src`;
     this.log = logger;
     this.models = new Map();
-    this.connection = {}
+    this.connection = {};
+    this.config = config;
   }
 
   /**
@@ -21,7 +22,6 @@ class App {
    * 
    */
   async load() {
-    this.config = config;
     const modules = await loadModules(app);
 
     this.api = modules.api;

@@ -1,8 +1,11 @@
+'use strict';
+
 require('dotenv').config();
 
+const _ = require(`lodash`);
 const {getBool} = require(`./src/core/utils/configHelpers`);
 
-module.exports = {
+const options = {
   debug: getBool(process.env.debug, false),
   db: {
     client: `mysql`,
@@ -12,4 +15,17 @@ module.exports = {
     password: process.env.DB_PASSWORD || ``,
     charset: `utf8`
   }
+};
+
+const set = (key, value) => {
+  return _.set(options, key, value);
+};
+
+const get = (key) => {
+  return _.get(options, key);  
+};
+
+module.exports = {
+  set,
+  get
 };

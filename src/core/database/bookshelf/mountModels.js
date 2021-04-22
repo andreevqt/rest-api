@@ -12,7 +12,7 @@ const {runMigrations} = require(`./schemaBuilder`);
 
 const mountModels = async ({models, target}, {orm}) => {
   const getClient = () => {
-    return process.env.NODE_ENV === `test` ? `sqlite3` : app.config.db.client;
+    return process.env.NODE_ENV === `test` ? `sqlite3` : app.config.get(`db.client`);
   };
 
   const updateModel = async (model) => {

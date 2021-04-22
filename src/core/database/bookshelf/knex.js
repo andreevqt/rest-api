@@ -13,24 +13,20 @@ const init = async (app) => {
       connection: {
         filename: `:memory:`
       },
-      debug: config.debug,
+      debug: config.get(`db.debug`),
       useNullAsDefault: true
     });
   } else {
     knex = require(`knex`)({
-      debug: config.debug,
-      client: config.db.client,
-      connection: config.db
+      debug: config.get(`db.debug`),
+      client: config.get(`db.client`),
+      connection: config.get(`db`)
     });
   }
 
   // set app connection
   app.connection = knex;
   return knex;
-};
-
-const close = async () => {
-  return knex.destroy();
 };
 
 module.exports = init;
