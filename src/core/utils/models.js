@@ -17,7 +17,10 @@ module.exports = {
     const targetName = association.model || '';
 
     const targetModel = app.getModel(targetName);
-    const infos = this.getNature();
+
+    const infos = this.getNature( {
+      
+    });
 
   },
 
