@@ -13,12 +13,12 @@ const init = async (app) => {
       connection: {
         filename: `:memory:`
       },
-      debug: config.get(`db.debug`),
+      debug: config.get(`debug`),
       useNullAsDefault: true
     });
   } else {
     knex = require(`knex`)({
-      debug: config.get(`db.debug`),
+      debug: config.get(`debug`),
       client: config.get(`db.client`),
       connection: config.get(`db`)
     });
