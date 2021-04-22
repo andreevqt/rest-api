@@ -5,14 +5,12 @@ const _ = require(`lodash`);
 const {getColumnsWhereDefinitionChanged} = require(`./coreStoreDefinition`);
 
 const createOrUpdateTable = async ({definition, orm}) => {
-  const {settings: {tableName, id}, attributes} = definition;
+  const {tableName, attributes} = definition;
 
   const tableExists = await orm.knex.schema.hasTable(tableName);
 
   const createId = (table) => {
-    if (id) {
-      table.increments(`id`).primary();
-    }
+    table.increments(`id`).primary();
   };
 
   const uniqueColName = (table, key) => `${table}_${key}_unique`;
@@ -132,7 +130,7 @@ const createOrUpdateTable = async ({definition, orm}) => {
   }
 
   const attrsNameWithoutTimestamps = attributesNames.filter(
-    columnName => !(definition.settings.timestamps || []).includes(columnName)
+    columnName => !(definition.options.timestamps || []).includes(columnName)
   );
 
   const columnsToAlter = await getColumnsWhereDefinitionChanged(
@@ -140,8 +138,6 @@ const createOrUpdateTable = async ({definition, orm}) => {
     definition,
     orm
   );
-
-  console.log(`here`);
 
   const shouldRebuild =
     columnsToAlter.length > 0 || definition.client === 'sqlite3';

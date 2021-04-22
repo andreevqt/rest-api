@@ -15,14 +15,9 @@ const getDefinitionFromStore = async (definition, orm) => {
     return undefined;
   }
 
-  let def;
-
-  const coreStore = app.db.models['core_store'];
-  if (coreStore) {
-    def = await app.db.models['core_store']
+  const def = await app.models['core_store']
       .forge({key: `model_def_${definition.uid}`})
       .fetch();
-  }
 
   return def ? def.toJSON() : undefined;
 };
@@ -45,10 +40,10 @@ const storeDefinition = async (definition, orm) => {
   };
 
   if (existingDef) {
-    return app.db.models[`core_store`].forge({id: existingDef.id}).save(defData)
+    return app.models[`core_store`].forge({id: existingDef.id}).save(defData)
   }
 
-  return app.db.models[`core_store`].forge(defData).save();
+  return app.models[`core_store`].forge(defData).save();
 };
 
 const getColumnsWhereDefinitionChanged = async (columnsName, definition, orm) => {

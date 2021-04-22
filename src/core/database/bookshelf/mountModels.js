@@ -6,29 +6,15 @@ const pluralize = require(`pluralize`);
 const {coreStoreModel} = require(`../../utils/coreStore`);
 const {storeDefinition} = require(`./coreStoreDefinition`)
 const _ = require(`lodash`);
+const modelsUtils = require(`../../utils/models`);
+const {runMigrations} = require(`./schemaBuilder`);
 
-const getClient = () => {
-  return process.env.NODE_ENV === `test` ? `sqlite3` : app.config.db.client;
-}
 
-/**
- * 
- * @param {String} modelsPath 
- * @param {Object} schemaBuilder
- * @param {Object} bookshelf instance 
- * 
- * @returns {Object}
- */
-const mountModels = async () => {
+
+/* const mountModels = async () => {
   const {modelsPath} = app;
   const {orm, connector: {schemaBuilder}} = app.db;
 
-  /**
-   * 
-   * @param {Object} definition 
-   * 
-   * @returns {Object}
-   */
   const mountModel = async (definition) => {
     await schemaBuilder.runMigrations({definition, orm});
 
@@ -36,7 +22,7 @@ const mountModels = async () => {
       requireFetch: false,
       tableName: definition.settings.tableName,
       associations: [],
-    });
+    }, definition.options);
 
     return orm.Model.extend(loadedModel);
   };
@@ -55,6 +41,18 @@ const mountModels = async () => {
     definition.settings.tableName = definition.settings.tableName || plural;
     definition.client = getClient();
     definition.associations = [];
+    definition.options = definition.options || {};
+
+    
+    Object.keys(definition.attributes).forEach((name) => {
+      const details = definition.attributes[name];
+      if (details.type !== undefined) {
+        return;
+      }
+
+      modelsUtils.defineAssociations(definition, details. name);
+    })
+    modelsUtils.defineAssociations(definition);
 
     const model = await mountModel(definition);
     await storeDefinition(definition, orm);
@@ -63,13 +61,44 @@ const mountModels = async () => {
   }, Promise.resolve({}));
 
   app.db.models = {...app.db.models, ...models};
-}
+} */
 
-const mountCoreStore = () => {
-  
+const mountModels = async ({models, target}, {orm}) => {
+  const getClient = () => {
+    return process.env.NODE_ENV === `test` ? `sqlite3` : app.config.db.client;
+  };
+
+  const updateModel = async (model) => {
+    const definition = models[model];
+
+    definition.associations = [];
+    definition.orm = `bookshelf`;
+    definition.client = getClient();
+    definition.primaryKey = `id`;
+    definition.primaryKeyType = `integer`;
+
+    target[model].allAttributes = {...definition.attributes};
+
+    const loadedModel = _.assign({
+      requireFetch: false,
+      tableName: definition.tableName,
+      associations: [],
+    }, definition.options);
+
+    const ormModel = orm.Model.extend(loadedModel);
+
+    target[model] = _.assign(ormModel, target[model]);
+    target[model]._attributes = definition.attributes;
+
+    await runMigrations({definition, orm})
+    await storeDefinition(definition, orm);
+  };
+
+  for (const model of _.keys(models)) {
+    await updateModel(model);
+  }
 }
 
 module.exports = {
-  mountModels,
-  mountCoreStore
+  mountModels
 };

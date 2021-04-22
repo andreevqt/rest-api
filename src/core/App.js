@@ -2,14 +2,18 @@
 
 const config = require(`../../config`);
 const {createDatabaseManager} = require(`./database/DatabaseManager`);
-const {createCoreStore} = require(`./utils/coreStore`)
+const {createCoreStore, coreStoreModel} = require(`./utils/coreStore`)
 const logger = require(`./utils/logger`);
+const loadModules = require(`./load/loadModules`);
+const bootstrap = require("./load/bootstrap");
 
 class App {
 
-  constructor() {
-    this.modelsPath = `${process.cwd()}/src/models`;
+  constructor(opts = {}) {
+    this.dir = opts.dir || `${process.cwd()}/src`;
     this.log = logger;
+    this.models = new Map();
+    this.connection = {}
   }
 
   /**
@@ -18,11 +22,22 @@ class App {
    */
   async load() {
     this.config = config;
-    this.db = createDatabaseManager(this);
-    await this.db.connect();
+    const modules = await loadModules(app);
 
-    this.store = createCoreStore({db: this.db});
-    this.log.info(`App has been loaded`);
+    this.api = modules.api;
+
+    bootstrap(this);
+
+    this.models[`core_store`] = coreStoreModel;
+
+    this.db = createDatabaseManager(this);
+
+    await this.db.init();
+
+    // await this.db.connect();
+
+    // this.store = createCoreStore({db: this.db});
+    // this.log.info(`App has been loaded`);
   }
 
   /**

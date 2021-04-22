@@ -7,6 +7,8 @@
     "bookshelf": "1.2.0",
     "cross-env": "7.0.3",
     "dotenv": "^8.2.0",
+    "fs-extra": "9.1.0",
+    "glob": "7.1.6",
     "knex": "0.21.18",
     "lodash": "4.17.21",
     "mysql": "2.18.1",

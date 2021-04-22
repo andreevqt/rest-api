@@ -1,23 +1,48 @@
 'use strict';
 
-const config = require(`../../../../config`);
-const pluralize = require(`pluralize`);
 const queries = require(`./queries`);
 const _ = require(`lodash`);
-const connection = require(`./knex`);
+const initKnex = require(`./knex`);
 const schemaBuilder = require(`./schemaBuilder`);
 const {mountModels} = require(`./mountModels`);
 const bookshelf = require(`bookshelf`);
 
-const orm = (connection) => {
-  return new bookshelf(connection);
+module.exports = (app) => {
+  const mountConnection = async (ctx) => {
+    const {orm} = ctx;
+  
+    await mountModels({
+      models: {
+        'core_store': app.models[`core_store`]
+      },
+      target: app.models
+    }, {
+      orm 
+    });
+  
+    await mountModels({
+      models: app.models,
+      target: app.models
+    }, {
+      orm
+    });
+  };
+  
+  const initialize = async () => {
+    initKnex(app); 
+  
+    const orm = new bookshelf(app.connection);
+    await mountConnection({orm});
+  };
+  
+  const close = async () => {
+    await app.connection.destroy();
+  };
+
+  return {
+    initialize,
+    close,
+    queries,
+    schemaBuilder
+  }
 }
-
-module.exports = {
-  connection,
-  schemaBuilder,
-  queries,
-  mountModels,
-  orm
-};
-

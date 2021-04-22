@@ -3,10 +3,10 @@
 const _ = require(`lodash`);
 
 const coreStoreModel = {
-  uid: `app:core_store`,
-  settings: {
-    id: true,
-    tableName: `core_store`
+  uid: `core::core_store`,
+  tableName: `core_store`,
+  options: {
+    
   },
   attributes: {
     key: {

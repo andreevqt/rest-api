@@ -10,45 +10,59 @@ class DatabaseManager {
   constructor(app) {
     this.app = app;
     this.initialized = false;
+
+    this.models = new Map();
+    this.queries = new Map();
   }
 
-  async connect() {
+  async init() {
     if (this.initialized) {
       console.log(`DatabaseManager has initialized already`);
       return;
     }
 
     const {config: {db: {client}}} = this.app;
-    
+
+    this.initializeModelsMap();
 
     if ([`pg`, `mysql`, `sqlite`].includes(client)) {
-      this.connector = bookshelf;
-
-      const knex = await bookshelf.connection.connect();
-      this.orm = bookshelf.orm(knex);
-
-      this.models = {};
-      await mountModels();
-
+      this.connector = bookshelf(app);
+      await this.connector.initialize();
       this.initialized = true;
     }
 
     return this;
   }
 
-  close() {
-    this.connector.connection.close();
+  initializeModelsMap() {
+    Object.keys(this.app.models).forEach((modelKey) => {
+      const model = this.app.models[modelKey];
+      this.models.set(model.uid, model);
+    });
   }
 
-  findEntity(entity) {
-    return _.find(
-      this.models,
-      (_o, key) => key === entity
-    );
+  getModelFromApp(name) {
+    const key = _.toLower(name);
+    return _.get(this.app, ['models', key]);
+  }
+
+  getModel(name) {
+    const key = _.toLower(name);
+
+    if (this.models.has(key)) {
+      const {modelName} = this.models.get(key);
+      return this.getModelFromApp(modelName);
+    } else {
+      return this.getModelFromApp(key);
+    }
+  }
+
+  close() {
+    this.connector.close()
   }
 
   query(entity) {
-    const model = this.findEntity(entity);
+    const model = this.getModel(entity);
     return this.connector.queries({model, app: this.app});
   }
 }

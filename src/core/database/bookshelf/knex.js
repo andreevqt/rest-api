@@ -1,9 +1,11 @@
 'use strict';
 
-let knex;
+const _ = require(`lodash`);
 
-const connect = async () => {
+const init = async (app) => {
   const {config} = app;
+
+  let knex;
   
   if (process.env.NODE_ENV === `test`) {
     knex = require(`knex`)({
@@ -22,6 +24,8 @@ const connect = async () => {
     });
   }
 
+  // set app connection
+  app.connection = knex;
   return knex;
 };
 
@@ -29,7 +33,4 @@ const close = async () => {
   return knex.destroy();
 };
 
-module.exports = {
-  connect,
-  close
-};
+module.exports = init;
