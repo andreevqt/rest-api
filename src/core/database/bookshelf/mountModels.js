@@ -10,7 +10,7 @@ const modelsUtils = require(`../../utils/models`);
 const {runMigrations} = require(`./schemaBuilder`);
 
 
-const mountModels = async ({models, target}, {orm}) => {
+const mountModels = async ({models, target}, {orm, GLOBALS}) => {
   const getClient = () => {
     return process.env.NODE_ENV === `test` ? `sqlite3` : app.config.get(`db.client`);
   };
@@ -32,11 +32,6 @@ const mountModels = async ({models, target}, {orm}) => {
       associations: [],
     }, definition.options);
 
-    const ormModel = orm.Model.extend(loadedModel);
-
-    target[model] = _.assign(ormModel, target[model]);
-    target[model]._attributes = definition.attributes;
-
     // relations
     Object.keys(definition.attributes).forEach((name) => {
       const details = definition.attributes[name];
@@ -46,21 +41,53 @@ const mountModels = async ({models, target}, {orm}) => {
 
       const {nature, verbose} = modelsUtils.getNature({
         attribute: details,
-        attributeName,
+        attributeName: name,
         modelName: model.toLowerCase()
       });
 
+      if (nature) {
+        console.log(`${nature} ${name}`);
+      }
+
       modelsUtils.defineAssociations(model.toLowerCase(), definition, details, name);
 
+      const globalName = details.model || details.collection || ``;
+      const {globalId} = app.db.getModel(globalName.toLowerCase());
+
       switch (verbose) {
-        case `hasOne`:
-          
+        case `hasOne`: {
+          const target = app.models[details.model];
+          const FK = _.findKey(target.attributes, (details) => {
+            if (
+              _.has(details, `model`) &&
+              details.model === model &&
+              _.has(details, `via`) &&
+              details.via === name
+            ) {
+              return details;
+            }
+          });
+
+          const columnName = _.get(target.attributes, [FK, `columnName`], FK);
+          loadedModel[name] = function () {
+            return this.hasOne(GLOBALS[globalId], columnName);
+          }
+
+          break;
+        }
+
+        // TODO: oneToMany
         default:
           break;
       }
     });
 
-    await runMigrations({definition, orm})
+    GLOBALS[definition.globalId] = orm.Model.extend(loadedModel);
+
+    target[model] = _.assign(GLOBALS[definition.globalId], target[model]);
+    target[model]._attributes = definition.attributes;
+
+    await runMigrations({definition, orm});
     await storeDefinition(definition, orm);
   };
 

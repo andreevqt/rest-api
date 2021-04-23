@@ -7,6 +7,10 @@ module.exports = {
     }, 
     email: {
       type: `string`
+    },
+    article : {
+      collection: `post`,
+      via: `author`
     }
   }
 };

@@ -23,8 +23,25 @@ const createOrUpdateTable = async ({definition, orm}) => {
     });
   };
 
-  const buildColumn = (table, name, type) => {
-    switch (type) {
+  const buildColumn = ({name, attribute, table, tableExists = false, definition, ORM}) => {
+    if (!attribute.type) {
+      const relation = definition.associations.find(association => association.alias === name);
+
+      if (['oneToOne', 'manyToOne', 'oneWay'].includes(relation.nature)) {
+        return buildColumn({
+          name,
+          attribute: {type: definition.primaryKeyType},
+          table,
+          tableExists,
+          definition,
+          orm,
+        });
+      }
+
+      return null;
+    }
+
+    switch (attribute.type) {
       case `string`:
         return table.string(name);
       case `text`:
@@ -46,32 +63,41 @@ const createOrUpdateTable = async ({definition, orm}) => {
   };
 
   const alterColumns = (table, columns, opts = {}) => {
-    return createColumns(table, columns, { ...opts, alter: true });
+    return createColumns(table, columns, {...opts, alter: true});
   };
 
   const createColumns = (table, columns, opts = {}) => {
     const {tableExists, alter = false} = opts;
 
     Object.keys(columns).forEach((key) => {
-      const {required = false, type, unique} = columns[key];
-      const col = buildColumn(table, key, type);
+      const attribute = columns[key];
+      const col = buildColumn({
+        name: key,
+        attribute,
+        table,
+        tableExists,
+        definition,
+        orm
+      }
+
+        /* table, key, type */);
       if (!col) {
         return;
       }
 
-      if (required) {
+      if (attribute.required) {
         col.notNullable();
       } else {
         col.nullable();
       }
 
-      if (unique) {
+      if (attribute.unique) {
         if (definition.client !== 'sqlite3' || !tableExists) {
           tbl.unique(key, uniqueColName(table, key));
         }
       }
 
-      if (alter) {
+      if (attribute.alter) {
         col.alter();
       }
     })
@@ -86,25 +112,25 @@ const createOrUpdateTable = async ({definition, orm}) => {
     };
   };
 
-  const isColumn = ({ definition, attribute, name }) => {
+  const isColumn = ({definition, attribute, name}) => {
     if (!_.has(attribute, 'type')) {
       const relation = definition.associations.find((association) => {
         return association.alias === name;
       });
-  
+
       if (!relation) return false;
-  
+
       if (['oneToOne', 'manyToOne', 'oneWay'].includes(relation.nature)) {
         return true;
       }
-  
+
       return false;
     }
-  
+
     if (['component', 'dynamiczone'].includes(attribute.type)) {
       return false;
     }
-  
+
     return !_.has(attribute, 'type');
   };
 

@@ -1,12 +1,14 @@
 'use strict';
 
 const _ = require(`lodash`);
+const {getGlobalId} = require(`../utils/contentTypes`)
 
 const coreStoreModel = {
   uid: `core::core_store`,
   tableName: `core_store`,
+  globalId: getGlobalId({},`core_store`),
   options: {
-    
+        
   },
   attributes: {
     key: {

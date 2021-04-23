@@ -9,32 +9,27 @@ const bookshelf = require(`bookshelf`);
 
 module.exports = (app) => {
   const mountConnection = async (ctx) => {
-    const {orm} = ctx;
-  
     await mountModels({
       models: {
         'core_store': app.models[`core_store`]
       },
       target: app.models
-    }, {
-      orm 
-    });
-  
+    }, ctx);
+
     await mountModels({
       models: app.models,
       target: app.models
-    }, {
-      orm
-    });
+    }, ctx);
   };
-  
+
   const initialize = async () => {
-    initKnex(app); 
-  
+    initKnex(app);
+
+    const GLOBALS = {};
     const orm = new bookshelf(app.connection);
-    await mountConnection({orm});
+    await mountConnection({orm, GLOBALS});
   };
-  
+
   const close = async () => {
     await app.connection.destroy();
   };

@@ -15,6 +15,11 @@ const pickSchema = model => {
   return schema;
 };
 
+const getGlobalId = (model, modelName, prefix) => {
+  const globalId = prefix ? `${prefix}-${modelName}` : modelName;
+  return model.globalId || _.upperFirst(_.camelCase(globalId));
+};
+
 const createContentType = (model, {modelName}, {apiName}) => {
   if (apiName) {
     Object.assign(model, {
@@ -32,10 +37,12 @@ const createContentType = (model, {modelName}, {apiName}) => {
     modelType: 'contentType',
     modelName,
     tableName: model.tableName || pluralize(modelName),
-    options: model.options || {}
+    options: model.options || {},
+    globalId: getGlobalId(model, modelName)
   });
 };
 
 module.exports = {
-  createContentType
+  createContentType,
+  getGlobalId
 };
