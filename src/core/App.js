@@ -11,6 +11,7 @@ class App {
 
   constructor(opts = {}) {
     this.dir = opts.dir || `${process.cwd()}/src`;
+    this.loadModules = opts.loadModules || true;
     this.log = logger;
     this.models = new Map();
     this.connection = {};
@@ -22,22 +23,24 @@ class App {
    * 
    */
   async load() {
-    const modules = await loadModules(app);
-
-    this.api = modules.api;
+    // needed for tests
+    if (loadModules) {
+      const modules = await loadModules(app);
+      this.api = modules.api;
+    }
 
     bootstrap(this);
 
     this.models[`core_store`] = coreStoreModel;
 
     this.db = createDatabaseManager(this);
-
     await this.db.init();
 
-    // await this.db.connect();
+    this.store = createCoreStore({db: this.db});
+  }
 
-    // this.store = createCoreStore({db: this.db});
-    // this.log.info(`App has been loaded`);
+  setApi(api) {
+    this.api = api;
   }
 
   /**
@@ -69,8 +72,8 @@ class App {
   }
 }
 
-module.exports = () => {
-  const app = new App();
+module.exports = (opts) => {
+  const app = new App(opts);
 
   global.app = app;
 

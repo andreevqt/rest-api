@@ -45,10 +45,6 @@ const mountModels = async ({models, target}, {orm, GLOBALS}) => {
         modelName: model.toLowerCase()
       });
 
-      if (nature) {
-        console.log(`${nature} ${name}`);
-      }
-
       modelsUtils.defineAssociations(model.toLowerCase(), definition, details, name);
 
       const globalName = details.model || details.collection || ``;
