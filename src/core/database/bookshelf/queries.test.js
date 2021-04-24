@@ -1,15 +1,77 @@
 'use strict';
 
-const app = require(`../../App`)();
-const postsData = require(`../../tests/fixtures/data/posts`);
+const app = require(`../../App`)({loadModules: false});
+
+const api = {
+  posts: {
+    models: {
+      post: {
+        attributes: {
+          title: {
+            type: `string`,
+            required: true,
+          },
+          content: {
+            type: `text`
+          },
+          author: {
+            model: `user`
+          }
+        }
+      }
+    }
+  }, 
+  users: {
+    models: {
+      user: {
+        attributes: {
+          name: {
+            type: `string`
+          },
+          email: {
+            type: `string`
+          }, 
+          posts: {
+            collection: `post`,
+            via: `posts`
+          }
+        }
+      }
+    }
+  }
+};
+
+const fixtures = {
+  posts: [
+    {
+      title: `Lorem ipsum dolor sit amet`,
+      content: `Integer eget magna fringilla, scelerisque enim ut, convallis sapien. Sed vitae elit tellus. Interdum et malesuada fames ac ante ipsum primis in faucibus.`
+    }, {
+      title: `In orci ex, vulputate sit`,
+      content: `Integer eget magna fringilla, scelerisque enim ut, convallis sapien. Sed vitae elit tellus. Interdum et malesuada fames ac ante ipsum primis in faucibus.`
+    }, {
+      title: `Maecenas tristique molestie ligula`,
+      content: `Integer eget magna fringilla, scelerisque enim ut, convallis sapien. Sed vitae elit tellus. Interdum et malesuada fames ac ante ipsum primis in faucibus.`
+    }, {
+      title: `Vestibulum malesuada orci quam`,
+      content: `Integer eget magna fringilla, scelerisque enim ut, convallis sapien. Sed vitae elit tellus. Interdum et malesuada fames ac ante ipsum primis in faucibus.`
+    }, {
+      title: `Class aptent taciti sociosqu ad litora`,
+      content: `Integer eget magna fringilla, scelerisque enim ut, convallis sapien. Sed vitae elit tellus. Interdum et malesuada fames ac ante ipsum primis in faucibus.`
+    },
+  ]
+};
 
 beforeAll(async () => {
-  app.setModelsPath(`${process.cwd()}/src/core/tests/fixtures/models`);
-  await app.load();
+  app.setApi(api)
 
-  postsData.forEach(async (data) => {
-    await app.query(`post`).create(data);
-  })
+  await app.load();
+  const posts = fixtures.posts;
+
+  for (let i = 0; i < posts.length; i++) {
+    const post = posts[i];
+    await app.query(`post`).create(post);
+  }
 });
 
 afterAll(async () => {
@@ -83,6 +145,15 @@ describe(`find`, () => {
 
 describe(`findOne`, () => {
   test(`Should return one entry`, async () => {
+    const post = await app.query(`post`)
+      .findOne({title_contains: `lorem`});
+
+    expect(/lorem/i.test(post.title)).toBe(true);
+  });
+})
+
+describe(`populate`, () => {
+  test(`Should populate relation`, async () => {
     const post = await app.query(`post`)
       .findOne({title_contains: `lorem`});
 

@@ -71,7 +71,27 @@ const mountModels = async ({models, target}, {orm, GLOBALS}) => {
 
           break;
         }
+        case `hasMany`: {
+          const columnName = _.get(
+            app.models,
+            [model.collection, 'attributes', details.via, 'columnName'],
+            details.via
+          );
 
+          details.virtual = true;
+
+          loadedModel[name] = function() {
+            return this.hasMany(GLOBALS[globalId], columnName);
+          };
+
+          break;
+        }
+        case `belongsTo`: {
+          loadedModel[name] = function() {
+            return this.belongsTo(GLOBALS[globalId], _.get(details, 'columnName', name));
+          };
+          break;
+        }
         // TODO: oneToMany
         default:
           break;

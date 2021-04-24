@@ -127,11 +127,7 @@ const createOrUpdateTable = async ({definition, orm}) => {
       return false;
     }
 
-    if (['component', 'dynamiczone'].includes(attribute.type)) {
-      return false;
-    }
-
-    return !_.has(attribute, 'type');
+    return true
   };
 
   if (!tableExists) {
@@ -210,6 +206,7 @@ const createOrUpdateTable = async ({definition, orm}) => {
           } else {
             app.log.error(`Migration failed`);
             app.log.error(err);
+            app.log.error(err.stack);
           }
 
           return false;
