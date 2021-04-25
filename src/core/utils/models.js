@@ -3,6 +3,10 @@
 const _ = require(`lodash`);
 
 module.exports = {
+  getValuePrimaryKey: function (value, defaultKey) {
+    return value[defaultKey] || value.id || value._id;
+  },
+
   getNature: function ({attribute, attributeName, modelName}) {
     const types = {
       current: '',
