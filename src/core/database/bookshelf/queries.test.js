@@ -152,7 +152,7 @@ describe(`findOne`, () => {
   });
 })
 
-describe(`populate`, () => {
+/* describe(`populate`, () => {
   test(`Should populate relation`, async () => {
     const post = await app.query(`post`)
       .findOne({title_contains: `lorem`});
@@ -160,3 +160,4 @@ describe(`populate`, () => {
     expect(/lorem/i.test(post.title)).toBe(true);
   });
 })
+ */

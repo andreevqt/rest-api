@@ -15,18 +15,18 @@ module.exports = ({model, app}) => {
     `through`
   ];
 
+  const assocKeys = model.associations.map(ast => ast.alias);
+
+  const pickRelations = attributes => {
+    return _.pick(attributes, assocKeys);
+  };
+
   const selectAttributes = (attributes) => {
-    return _.pickBy(attributes, ({type}, key) => {
-      return !relationsTypes.includes(type);
+    return _.pickBy(attributes, (value, key) => {
+      return _.has(model.allAttributes, key);
     });
   };
-
-  const selectRelations = (attributes) => {
-    return _.pickBy(attributes, ({type}, key) => {
-      return relationsTypes.includes(type);
-    });
-  };
-
+  
   const convertParams = (params) => {
     const {start, limit, sort, where, ...rest} = params;
     const result = {};
@@ -67,7 +67,10 @@ module.exports = ({model, app}) => {
   };
 
   const create = async (attributes, {transacting} = {}) => {
+    const relations = pickRelations(attributes);
     const data = {...selectAttributes(attributes)};
+
+    
     return (await model.forge(data).save(null, {transacting})).toJSON();
   };
 
